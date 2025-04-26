@@ -1,0 +1,24 @@
+<h2>Versions for {{ file_key }}</h2>
+<table>
+    <tr>
+        <th>Version ID</th>
+        <th>Last Modified</th>
+        <th>Is Latest?</th>
+        <th>Action</th>
+    </tr>
+    {% for v in versions %}
+    <tr>
+        <td>{{ v.VersionId }}</td>
+        <td>{{ v.LastModified }}</td>
+        <td>{{ v.IsLatest }}</td>
+        <td>
+            <form method="post" action="{% url 'download_version' %}">
+                {% csrf_token %}
+                <input type="hidden" name="file_key" value="{{ v.Key }}">
+                <input type="hidden" name="version_id" value="{{ v.VersionId }}">
+                <button type="submit">Download</button>
+            </form>
+        </td>
+    </tr>
+    {% endfor %}
+</table>

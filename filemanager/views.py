@@ -1,0 +1,189 @@
+import os
+import pandas as pd
+from io import BytesIO
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from django.http import HttpResponse
+from django.contrib.auth.models import User
+import boto3
+from aws_helpers import check_key, ensure_bucket_exists
+from dotenv import load_dotenv
+
+load_dotenv()
+
+bucket_name = os.getenv("AWS_BUCKET_NAME")
+if not bucket_name:
+    raise RuntimeError("Bucket name is not set in environment variables.")
+
+s3_client = boto3.client("s3")
+
+
+def home_view(request):
+    return render(request, "filemanager/home.html")
+
+
+@login_required()
+def upload_view(request):
+    if ensure_bucket_exists():
+        if request.method == "POST":
+            file_obj = request.FILES.get("file")
+
+            if file_obj:
+                username = request.user.username
+                original_name = file_obj.name
+                s3_key = f"{username}/{original_name}"
+
+                s3_client.upload_fileobj(
+                    file_obj,
+                    bucket_name,
+                    s3_key,
+                    ExtraArgs={"ContentType": file_obj.content_type}
+                )
+                return HttpResponse(f"✅ Uploaded as '{s3_key}'")
+            return HttpResponse("❌ No file selected.")
+
+        return render(request, "filemanager/upload.html")
+    else:
+        return HttpResponse("❌ Missing bucket.")
+
+
+@login_required()
+def list_versions(request):
+    if request.method == "POST":
+        file_key = request.POST.get("file_key")
+
+        if not check_key(file_key):
+            return HttpResponse("No such key")
+
+        response = s3_client.list_object_versions(Bucket=bucket_name, Prefix=file_key)
+        return render(request, "filemanager/list_versions.html", {
+            "versions": response.get("Versions", []),
+            "file_key": file_key
+        })
+
+
+@login_required()
+def analysis_view(request):
+    username = request.user.username
+    prefix = f"{username}/"
+
+    response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+    files = []
+
+    for obj in response.get("Contents", []):
+        key = obj["Key"]
+        if "csv" in key or "ods":
+            if "/" in key:
+                files.append(key.split("/", 1)[1])  # Just 'resume.pdf'
+
+    if not files:
+        return HttpResponse("❌ No PDF files found.")
+
+    return render(request, "filemanager/analysis.html", {"files": files})
+
+
+@login_required()
+def analysis_csv(request):
+    if request.method == "POST":
+        file_key = request.POST.get("file_key")
+
+        full_key = f"{request.user.username}/{file_key}"
+
+        if not check_key(file_key, request.user.username):
+            return HttpResponse("No such key")
+
+        response = s3_client.get_object(Bucket=bucket_name, Key=full_key)
+
+        try:
+            df = pd.read_csv(BytesIO(response["Body"].read()), encoding="utf-8")
+        except UnicodeDecodeError:
+            df = pd.read_csv(BytesIO(response["Body"].read()), encoding="ISO-8859-1")
+
+        cols = df.columns
+        shape = df.shape
+        top = df.head(3)
+
+        return render(request, "filemanager/analysis_results.html", {
+            "filename": file_key.split("/")[-1],  # just the CSV name
+            "columns": cols,
+            "shape": shape,
+            "preview": top.to_html(classes="table table-striped", index=False)
+        })
+
+
+@login_required()
+def select_file_view(request):
+    username = request.user.username
+    prefix = f"{username}/"
+
+    response = s3_client.list_objects_v2(Bucket=bucket_name, Prefix=prefix)
+    files = []
+
+    for obj in response.get("Contents", []):
+        key = obj["Key"]  # e.g. kane/resume.pdf
+        if "/" in key:
+            files.append(key.split("/", 1)[1])  # Just 'resume.pdf'
+
+    return render(request, "filemanager/select_file.html", {"files": files})
+
+
+@login_required()
+def download_file(request):
+    key = request.POST.get("file_key")
+    version_id = request.POST.get("version_id")
+
+    safe_filename = os.path.basename(key)  # just the file name
+    ext = os.path.splitext(safe_filename)[-1]
+    clean_name = os.path.splitext(safe_filename)[0]
+    filename = f"{clean_name}_V{version_id[:8]}{ext}"
+
+    with open(filename, 'wb') as data:
+        s3_client.download_fileobj(
+            Bucket=bucket_name,
+            Key=key,
+            Fileobj=data,
+            ExtraArgs={"VersionId": version_id}
+        )
+    return HttpResponse("✅ Downloaded!")
+
+
+def signup_view(request):
+    if request.method == "POST":
+        username = request.POST.get("username")
+        password = request.POST.get("password")
+
+        if User.objects.filter(username=username).exists():
+            return HttpResponse("❌ Username already taken.")
+
+        User.objects.create_user(username=username, password=password)
+        return HttpResponse("✅ Signup successful!")
+
+    return render(request, "filemanager/signup.html")
+
+
+def analysis_view_col(request):
+    col = request.POST.get("column")
+    file_key = request.POST.get("file_key")
+
+    response = s3_client.get_object(Bucket=bucket_name, Key=file_key)
+
+    try:
+        df = pd.read_csv(BytesIO(response["Body"].read()), encoding="utf-8")
+    except UnicodeDecodeError:
+        df = pd.read_csv(BytesIO(response["Body"].read()), encoding="ISO-8859-1")
+
+    if col not in df.columns:
+        return HttpResponse("Column not found")
+
+    col_data = df[col].dropna()
+
+    if pd.api.types.is_numeric_dtype(col_data):
+        stats = col_data.describe().to_dict()
+    else:
+        stats = col_data.value_counts().head(10).to_dict()
+
+    return render(request, "filemanager/column_stats.html", {
+        "column": col,
+        "stats": stats,
+        "filename": file_key
+    })

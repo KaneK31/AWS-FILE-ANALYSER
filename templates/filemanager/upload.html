@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload to S3</title>
+</head>
+<body>
+    <h1>Upload a File</h1>
+
+    <form method="POST" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <label>Select File:</label>
+        <input type="file" name="file" required><br><br>
+
+        <button type="submit">Upload</button>
+    </form>
+</body>
+</html>

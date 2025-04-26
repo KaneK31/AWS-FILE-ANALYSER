@@ -1,0 +1,12 @@
+<h2>Select a file to view versions</h2>
+
+<form method="POST" action="{% url 'version' %}">
+    {% csrf_token %}
+    <label for="file_key">Choose a file:</label>
+    <select name="file_key">
+        {% for f in files %}
+            <option value="{{ user.username }}/{{ f }}">{{ f }}</option>
+        {% endfor %}
+    </select>
+    <button type="submit">See Versions</button>
+</form>
