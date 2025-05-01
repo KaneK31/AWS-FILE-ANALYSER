@@ -37,7 +37,7 @@ username/filename.csv
 ---
 
 
-🧪 How to Use
+## 🧪 How to Use
 Follow these steps after launching the Django server:
 
 1. 🔐 Sign Up / Log In
