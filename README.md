@@ -34,25 +34,54 @@ A full-stack Django application for uploading, versioning, analysing, and downlo
 All uploaded files follow this structure:
 username/filename.csv
 
-
-S3 versioning handles file history transparently.
-
 ---
 
-## ⚙️ Setup Instructions
 
-### 1. Clone the Repository
+🧪 How to Use
+Follow these steps after launching the Django server:
 
+1. 🔐 Sign Up / Log In
+Navigate to the homepage
 
-git clone https://github.com/yourusername/aws-file-manager.git
-cd aws-file-manager
+Create a new account or log in with an existing one
 
+2. 📤 Upload a File
+Click “Upload File”
 
-pip install -r requirements.txt
+Select a CSV or other file type
 
-AWS_BUCKET_NAME=your-bucket-name
-AWS_ACCESS_KEY_ID=your-access-key
-AWS_SECRET_ACCESS_KEY=your-secret-key
+The file will be uploaded to S3 under username/filename
 
-python manage.py runserver
+3. 📁 View Your Files
+Click “View My Files”
 
+Select a file to list all of its S3 versions
+
+4. 📥 Download a Specific Version
+Choose a version from the list
+
+Download it with a versioned filename like file_Vabcd1234.csv
+
+5. 📊 Analyze a File
+Click “Analyze a File”
+
+Choose a CSV you’ve uploaded
+
+You’ll see:
+
+Number of rows & columns
+
+Column names
+
+A preview of the first 3 rows
+
+6. 📈 Drill Down into a Column
+Pick a column from the dropdown
+
+You’ll get:
+
+📋 Stats: mean, median, std dev, top values, etc.
+
+📉 Plotly Chart: histogram for numeric/date columns
+
+All features are protected — you must be logged in to upload, download, or analyze files
