@@ -1,93 +1,30 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>File Version Manager</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 40px;
-            background-color: #f9f9f9;
-        }
+{% extends 'filemanager/base.html' %}
 
-        h1 {
-            color: #333;
-        }
+{% block title %}Home - File Manager{% endblock %}
 
-        .container {
-            background: white;
-            padding: 25px;
-            border-radius: 8px;
-            box-shadow: 0 0 8px rgba(0,0,0,0.1);
-            max-width: 600px;
-        }
+{% block content %}
+<div class="card p-4 shadow-sm">
+    {% if user.is_authenticated %}
+    <p>Hello, <strong>{{ user.username }}</strong>!</p>
 
-        .actions {
-            margin-top: 20px;
-        }
+    <div class="d-flex flex-wrap gap-2">
+        <a href="{% url 'upload' %}" class="btn btn-success">📤 Upload File</a>
+        <a href="{% url 'select_file' %}" class="btn btn-primary">📄 View My Files</a>
+        <a href="{% url 'analysis' %}" class="btn btn-info">📊 Analyze a File</a>
 
-        .actions form, .actions a {
-            display: inline-block;
-            margin-right: 10px;
-        }
-
-        button, a.button {
-            background-color: #4CAF50;
-            color: white;
-            padding: 10px 16px;
-            text-decoration: none;
-            border: none;
-            border-radius: 5px;
-            font-size: 14px;
-            cursor: pointer;
-        }
-
-        a.button {
-            display: inline-block;
-        }
-
-        button:hover, a.button:hover {
-            background-color: #45a049;
-        }
-
-        .logout-form {
-            display: inline;
-        }
-
-        .info {
-            margin-top: 30px;
-            color: #555;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>📂 File Version Manager</h1>
-
-        {% if user.is_authenticated %}
-            <p>Hello, <strong>{{ user.username }}</strong>!</p>
-
-            <div class="actions">
-                <a href="{% url 'upload' %}" class="button">📤 Upload File</a>
-
-                <form action="{% url 'select_file' %}" method="get" style="display: inline;">
-                    <button type="submit">📄 View My Files</button>
-                </form>
-
-                <form action="{% url 'logout' %}" method="post" class="logout-form">
-                    {% csrf_token %}
-                    <button type="submit">🚪 Logout</button>
-                </form>
-            </div>
-        {% else %}
-            <p>You are not logged in.</p>
-            <a href="{% url 'login' %}" class="button">🔐 Login</a>
-            <a href="{% url 'signup' %}" class="button">📝 Sign Up</a>
-        {% endif %}
-
-        <div class="info">
-            <p>This project lets users upload files to S3, track version history, and download any previous version.</p>
-        </div>
+        <form action="{% url 'logout' %}" method="post" class="d-inline">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-danger">🚪 Logout</button>
+        </form>
     </div>
-</body>
-</html>
+    {% else %}
+    <p>You are not logged in.</p>
+    <a href="{% url 'login' %}" class="btn btn-primary">🔐 Login</a>
+    <a href="{% url 'signup' %}" class="btn btn-secondary">📝 Sign Up</a>
+    {% endif %}
+
+    <div class="mt-4 text-muted">
+        <p>This app lets you upload files to S3, view version history, and analyze CSV files with Pandas.</p>
+    </div>
+</div>
+{% endblock %}

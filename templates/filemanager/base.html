@@ -9,14 +9,14 @@
 <div class="container py-4">
     <h1 class="mb-4 text-center">📁 File Version Manager</h1>
 
-    {% if user.is_authenticated %}
-        <p class="text-end">Hello, {{ user.username }} |
-            <form action="{% url 'logout' %}" method="post" style="display:inline;">
-                {% csrf_token %}
-                <button type="submit" class="btn btn-link btn-sm">Logout</button>
-            </form>
-        </p>
-    {% endif %}
+<!--    {% if user.is_authenticated %}-->
+<!--        <p class="text-end">Hello, {{ user.username }} |-->
+<!--            <form action="{% url 'logout' %}" method="post" style="display:inline;">-->
+<!--                {% csrf_token %}-->
+<!--                <button type="submit" class="btn btn-link btn-sm">Logout</button>-->
+<!--            </form>-->
+<!--        </p>-->
+<!--    {% endif %}-->
 
     {% block content %}{% endblock %}
 </div>
