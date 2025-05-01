@@ -4,7 +4,7 @@
 
 {% block content %}
     <h2 class="mb-3">📊 Select a File to Analyze</h2>
-    <form method="post" action="{% url 'analyze_file' %}">
+    <form method="post" action="{% url 'analysis_csv' %}">
         {% csrf_token %}
         <div class="mb-3">
             <label for="fileSelect" class="form-label">Choose a PDF file:</label>

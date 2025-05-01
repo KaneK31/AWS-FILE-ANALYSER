@@ -9,21 +9,27 @@
 
     <table class="table table-bordered table-hover">
         <thead class="thead-dark">
-            <tr>
-                <th>Metric / Value</th>
-                <th>Result</th>
-            </tr>
+        <tr>
+            <th>Metric / Value</th>
+            <th>Result</th>
+        </tr>
         </thead>
         <tbody>
-            {% for key, value in stats.items %}
-            <tr>
-                <td><strong>{{ key }}</strong></td>
-                <td>{{ value }}</td>
-            </tr>
-            {% endfor %}
+        {% for key, value in stats.items %}
+        <tr>
+            <td><strong>{{ key }}</strong></td>
+            <td>{{ value }}</td>
+        </tr>
+        {% endfor %}
         </tbody>
     </table>
 
-    <a href="{% url 'analyze_file' %}" class="btn btn-primary mt-3">🔁 Analyze Another Column</a>
+    {% if plot_html %}
+    <hr>
+    <h4>📊 Distribution Chart</h4>
+    <div>{{ plot_html|safe }}</div>
+    {% endif %}
+
+    <a href="{% url 'analysis' %}" class="btn btn-primary mt-3">🔁 Analyze Another Column</a>
 </div>
 {% endblock %}

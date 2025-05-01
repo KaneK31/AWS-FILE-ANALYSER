@@ -1,5 +1,5 @@
 # main.py
-from aws_helpers import upload_file, list_versions, download_file
+from filemanager.helpers.s3_helpers import upload_file, list_versions, download_file
 
 
 # from analyzer import analyze_csv

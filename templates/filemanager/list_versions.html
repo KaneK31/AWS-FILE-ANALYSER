@@ -12,7 +12,7 @@
         <td>{{ v.LastModified }}</td>
         <td>{{ v.IsLatest }}</td>
         <td>
-            <form method="post" action="{% url 'download_version' %}">
+            <form method="post" action="{% url 'download_file' %}">
                 {% csrf_token %}
                 <input type="hidden" name="file_key" value="{{ v.Key }}">
                 <input type="hidden" name="version_id" value="{{ v.VersionId }}">

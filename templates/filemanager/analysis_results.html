@@ -16,19 +16,25 @@
     {{ preview|safe }}
 </div>
 
-
-<form method="post" action="{% url 'analysis_view_col' %}">
+<form method="post" action="{% url 'analysis_col' %}" class="mt-4">
     {% csrf_token %}
-    <input type="hidden" name="file_key" value="{{ user.username  }}/{{ filename }}">
-    <label for="column">Choose column:</label>
-    <select name="column">
-        {% for col in columns %}
-        <option value="{{ col }}">{{ col }}</option>
-        {% endfor %}
-    </select>
-    <button type="submit">Analyze</button>
+    <input type="hidden" name="file_key" value="{{ user.username }}/{{ filename }}">
+    <div class="mb-3">
+        <label for="column" class="form-label">Choose column:</label>
+        <select name="column" id="column" class="form-select">
+            {% for col in columns %}
+            <option value="{{ col }}">{{ col }}</option>
+            {% endfor %}
+        </select>
+    </div>
+    <button type="submit" class="btn btn-success">Analyze Column</button>
 </form>
 
-
-<a href="{% url 'analyze_file' %}" class="btn btn-secondary mt-4">🔁 Analyze Another File</a>
+{% if plot_html %}
+    <h4 class="mt-5">📈 Distribution Chart</h4>
+    <div class="mt-3">
+        {{ plot_html|safe }}
+    </div>
+{% endif %}
+<a href="{% url 'analysis' %}" class="btn btn-primary mt-3">🔁 Analyze Another Column</a>
 {% endblock %}
