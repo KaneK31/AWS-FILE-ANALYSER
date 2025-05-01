@@ -43,7 +43,7 @@ S3 versioning handles file history transparently.
 
 ### 1. Clone the Repository
 
-```bash
+
 git clone https://github.com/yourusername/aws-file-manager.git
 cd aws-file-manager
 
