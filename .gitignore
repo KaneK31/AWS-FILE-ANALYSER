@@ -1,3 +1,21 @@
+# Ignore Python backup files
+*.py~
+
+# Ignore text files
+*.txt
+
+# Ignore Word documents
+*.doc
+*.docx
+
+# Ignore .env and virtual environments
 .env
-.idea
-.venv
+.venv/
+venv/
+ENV/
+
+# Ignore IDE/project-specific folders (e.g., PyCharm)
+.idea/
+
+# Ignore SQLite database files
+*.sqlite3
